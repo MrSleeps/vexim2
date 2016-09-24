@@ -43,10 +43,18 @@
     die;
   }
 
+  check_mail_address(
+    $_POST['localpart'],$_SESSION['domain_id'],'adminalias.php'
+  );
+
   # check_user_exists() will die if a user account already exists with the same localpart and domain id
   check_user_exists(
     $dbh,$_POST['localpart'],$_SESSION['domain_id'],'adminalias.php'
   );
+
+  if(!isset($_POST['realname']) || $_POST['realname']==='') {
+    $_POST['realname']=$_POST['localpart'];
+  }
 
   if ((preg_match("/['@%!\/\|\" ']/",$_POST['localpart']))
     || preg_match("/^\s*$/",$_POST['realname'])) {
@@ -63,6 +71,10 @@
   }
   $aliasto = implode(",",$forwardto);
   if (validate_password($_POST['clear'], $_POST['vclear'])) {
+    if (!password_strengthcheck($_POST['clear'])) {
+      header ("Location: adminalias.php?weakpass={$_POST['localpart']}");
+      die;
+    }
     $query = "INSERT INTO users
       (localpart, username, domain_id, crypt, smtp, pop, uid, gid, realname, type, admin, on_avscan, 
        on_spamassassin, sa_tag, sa_refuse, spam_drop, enabled)
@@ -82,9 +94,9 @@
        ':admin' => $_POST['admin'],
        ':on_avscan' => $_POST['on_avscan'],
        ':on_spamassassin' => $_POST['on_spamassassin'],
-       ':sa_tag' => $_POST['sa_tag'],
-       ':sa_refuse' => $_POST['sa_refuse'],
-       ':spam_drop' => $_POST['spam_drop'],
+       ':sa_tag'=>(isset($_POST['sa_tag']) ? $_POST['sa_tag'] : $sa_tag),
+       ':sa_refuse'=>(isset($_POST['sa_refuse']) ? $_POST['sa_refuse'] : $sa_refuse),
+       ':spam_drop'=>(isset($_POST['spam_drop']) ? $_POST['spam_drop'] : 0),
        ':enabled' => $_POST['enabled']
        ));
        

@@ -22,25 +22,30 @@
   <head>
     <title><?php echo _("Virtual Exim") . ": " . _("Manage Users"); ?></title>
     <link rel="stylesheet" href="style.css" type="text/css">
+    <script type='text/javascript'>
+      function fwac() {
+      document.getElementById('forward').disabled = !document.getElementById('on_forward').checked;
+      }
+    </script>
   </head>
-  <body onLoad="document.userchange.realname.focus()">
+  <body onLoad="document.forms[0].elements[0].focus(); fwac()">
     <?php include dirname(__FILE__) . "/config/header.php"; ?>
-    <div id="menu">
+    <div id="Menu">
       <a href="logout.php"><?php echo _("Logout"); ?></a><br>
     </div>
     <div id="forms">
       <form name="userchange" method="post" action="userchangesubmit.php">
-	<table align="center">
+        <table align="center">
 	  <tr><td><?php echo _("Name"); ?>:</td><td><input name="realname" type="text" value="<?php print $row['realname']; ?>" class="textfield"></td></tr>
 	  <tr><td><?php echo _("Email Address"); ?>:</td><td><?php print $row['localpart']."@".$_SESSION['domain']; ?></td>
 	  <tr><td><?php echo _("Password"); ?>:</td><td><input name="clear" type="password" class="textfield"></td></tr>
 	  <tr><td><?php echo _("Verify Password"); ?>:</td><td><input name="vclear" type="password" class="textfield"></td></tr>
    	  <tr><td colspan="2" style="padding-top:1em;"><b><?php echo _("Note:"); ?></b> <?php echo _("Attempting to set blank passwords does not work!"); ?><td></tr>
 	  <tr><td></td><td class="button"><input name="submit" type="submit" value="<?php echo _("Submit Password"); ?>"></td></tr>
-   </form>
+        </table>
+      </form>
       <form name="userchange" method="post" action="userchangesubmit.php">
-	</table>
-	<table align="center">
+        <table align="center">
          <?php if($row['type']!="alias") { ?>
 	  <tr><td colspan="2"><?php
 	    if ($row['quota'] != "0") {
@@ -120,25 +125,16 @@
 	    </td>
   	  </tr>
   	  <tr>
-        <?php if (function_exists('imap_qprint')) { ?>
   	    <td><?php echo _('Vacation message'); ?>:</td>
-  	    <td>
-            <textarea name="vacation" cols="40" rows="5" class="textfield"><?php print imap_qprint($row['vacation']); ?></textarea>
-          </td>
-        <?php } else { ?>
-  	    <td><?php echo _('Vacation message (ASCII only!)'); ?>:</td>
-  	    <td>
-            <textarea name="vacation" cols="40" rows="5" class="textfield"><?php print $row['vacation']; ?></textarea>
-	    </td>
-        <?php } ?>
+  	    <td><textarea name="vacation" cols="40" rows="5" class="textfield"><?php print quoted_printable_decode($row['vacation']); ?></textarea></td>
   	  </tr>
   	  <tr><td><?php echo _("Forwarding enabled"); ?>:</td>
-  	    <td><input name="on_forward" type="checkbox"
-          <?php if($row['on_forward'] == "1") { print " checked "; } ?>>
+  	    <td><input name="on_forward" type="checkbox" id="on_forward"
+          <?php if($row['on_forward'] == "1") { print " checked "; } ?> onchange="fwac()" onclick="fwac()">
           </td></tr>
   	  <tr><td><?php echo _("Forward mail to");?>:</td>
-	    <td><input type="text" name="forward" value="<?php print $row['forward']; ?>" class="textfield"><br>
-          <?php echo _("Must be a full e-mail address"); ?>
+	    <td><input type="text" name="forward" id="forward" value="<?php print $row['forward']; ?>" class="textfield"><br>
+          <?php echo _("Enter full e-mail addresses, use commas to separate them."); ?>
         </td></tr>
   	  <tr><td><?php echo  _("Store Forwarded Mail Locally");?>:</td>
   	    <td><input name="unseen" type="checkbox"
@@ -161,7 +157,7 @@
 	  </select></td>
 	    <td><input name="blockval" type="text" size="25" class="textfield">
 	  <input name="color" type="hidden" value="black"></td></tr>
-  	  <tr><td><input name="submit" type="submit" value="Submit"></td></tr>
+  	  <tr><td></td><td class="button"><input name="submit" type="submit" value="Submit"></td></tr>
     </table>
     </form>
     <table align="center">

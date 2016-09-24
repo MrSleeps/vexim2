@@ -6,16 +6,56 @@
      * validate if password and confirmation password match.
      * They can not be empty.
      *
-     * @param   string   $clear   cleartext password
-     * @param   string   $vclear  cleartext password (for validation)
-     * @return  boolean  true if they match and contain no illegal characters
+     * @param   string   $password   cleartext password
+     * @param   string   $confirmationPassword  cleartext password (for validation)
+     * @return  boolean  true if they match
      */
-    function validate_password($clear,$vclear) 
+    function validate_password($password, $confirmationPassword)
     {
-        return ($clear === $vclear) && ($clear !== "");
+        return is_string($password) && ($password === $confirmationPassword) && ($password !== "");
     }
 
+    /**
+     * check user password strength
+     *
+     * validate if password is strong enough
+     *
+     * @param   string   $candidate   cleartext password
+     * @return  boolean  true if password is strong enough
+     */
+    function password_strengthcheck($candidate)
+    {
+        global $passwordstrengthcheck;
+        
+        if ( $passwordstrengthcheck == 0
+          || preg_match_all('$\S*(?=\S{8,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])(?=\S*[\W])\S*$', $candidate)
+          || preg_match_all('$\S*(?=\S{12,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$', $candidate)
+          || preg_match_all('$\S*(?=\S{16,})(?=\S*[a-z])(?=\S*[A-Z])\S*$', $candidate)
+          || (strlen($candidate)>20)
+        ) {
+            if (strtolower($candidate) <> strtolower($_POST['localpart'])
+                && strtolower($candidate) <> strtolower($_POST['username'])
+                )
+            {
+                return TRUE;
+            }
+        }
 
+        return FALSE;
+/*
+    Explaining $\S*(?=\S{8,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])(?=\S*[\W])\S*$
+    $ = beginning of string
+    \S* = any set of characters
+    (?=\S{8,}) = of at least length 8
+    (?=\S*[a-z]) = containing at least one lowercase letter
+    (?=\S*[A-Z]) = and at least one uppercase letter
+    (?=\S*[\d]) = and at least one number
+    (?=\S*[\W]) = and at least a special character (non-word characters)
+    $ = end of the string
+
+ */
+    }
+    
     /**
      * Check if a user already exists.
      *
@@ -43,6 +83,23 @@
         }
     }
 
+    /**
+     * Check if mail address is compliant with RFC 3696.
+     * localpart must not exceed 64 char, and the complete mail address
+     * must not exceed 254 characters.
+     *
+     * @param  string  $localpart
+     * @param  string  $domain
+     * @param  string  $page       page to return to in case of failure
+     */
+    function check_mail_address($localpart,$domain,$page)
+    {
+      if ((strlen($localpart)+strlen($domain)>253) || strlen($localpart)>64)
+        {
+            header ("Location: $page?addresstoolong=$localpart");
+            die;
+        }
+    }
 
     /**
      * Render the alphabet. Directly onto the page.
@@ -142,16 +199,30 @@
         if (function_exists('mb_encode_mimeheader')) {
             mb_internal_encoding('UTF-8');
             $text = mb_encode_mimeheader($text, 'UTF-8', 'Q');
-        } elseif (function_exists('imap_8bit')) {
-            $text = str_replace(" ", "_", imap_8bit(trim($text)));
+        } else {
+            $text = str_replace(" ", "_", quoted_printable_encode(trim($text)));
             $text = str_replace("?", "=3F", $text);
             $text = str_replace("=\r\n", "?=\r\n =?UTF-8?Q?", $text);
             $text = "=?UTF-8?Q?" . $text . "?=" ;
         }
-        // if both mb and imap are not available, simply return what was given.
-        // this isn't standards-compliant, and the header will be displayed
-        // incorrectly if it contains accented letters. Let's just hope it won't
-        // be the case too often. :)
-        return $text;
     }
-?>
+
+    /**
+     * End current session and delete $_SESSION variable.
+     *
+     */
+    function invalidate_session()
+    {
+      $_SESSION = array();
+      session_destroy();
+    }
+
+    /**
+     * Makes any text safe to be displayed on a web page
+     * @param $text string
+     * @return string
+     */
+    function html_escape($text)
+    {
+        return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8');
+    }

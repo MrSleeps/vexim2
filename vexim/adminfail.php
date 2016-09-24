@@ -11,7 +11,7 @@
   </head>
   <body>
     <?php include dirname(__FILE__) . '/config/header.php'; ?>
-    <div id="menu">
+    <div id="Menu">
       <a href="adminfailadd.php"><?php echo _('Add Fail'); ?></a><br>
       <a href="admin.php"><?php echo _('Main Menu'); ?></a><br>
       <br><a href="logout.php"><?php echo _('Logout'); ?></a><br>
@@ -35,6 +35,8 @@
               . '<td align="center">'
               . '<a href="adminfaildelete.php?user_id='
               . $row['user_id']
+              . '&amp;localpart='
+              . $row['localpart']
               . '"><img class="trash" src="images/trashcan.gif" title="'
               . _('Delete fail ')
               . $row['localpart']

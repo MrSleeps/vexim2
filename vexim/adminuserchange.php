@@ -29,10 +29,27 @@
     <title><?php echo _('Virtual Exim') . ': ' . _('Manage Users'); ?></title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <script src="scripts.js" type="text/javascript"></script>
+    <script type='text/javascript'>
+      function fwac() {
+      document.getElementById('forward').disabled = !document.getElementById('on_forward').checked;
+      document.getElementById('forwardmenu').disabled = !document.getElementById('on_forward').checked;
+      }
+      function boxadd() {
+        var exstring = document.getElementById('forward').value;
+        var box = document.getElementById('forwardmenu');
+        var selectitem = box.options[box.selectedIndex].value;
+        if (!exstring.match(/\S/)) {
+          document.getElementById('forward').value=selectitem;
+        } else {
+          document.getElementById('forward').value += "," + selectitem;
+        }
+      }
+
+    </script>
   </head>
-  <body onLoad="document.userchange.realname.focus()">
+  <body onLoad="document.userchange.realname.focus(); fwac()">
   <?php include dirname(__FILE__) . '/config/header.php'; ?>
-    <div id="menu">
+    <div id="Menu">
       <a href="adminuser.php"><?php echo _('Manage Accounts'); ?></a><br>
       <a href="admin.php"><?php echo _('Main Menu'); ?></a><br>
       <br><a href="logout.php"><?php echo _('Logout'); ?></a><br>
@@ -47,21 +64,21 @@
 		}else{
 	?>
 	
-    <table align="center">
-      <form name="userchange" method="post" action="adminuserchangesubmit.php">
+    <form name="userchange" method="post" action="adminuserchangesubmit.php">
+      <table align="center">
         <tr>
           <td><?php echo _('Name'); ?>:</td>
           <td>
             <input type="text" size="25" name="realname"
               value="<?php print $row['realname']; ?>" class="textfield">
+            <input name="user_id" type="hidden"
+              value="<?php print $_GET['user_id']; ?>">
           </td>
         </tr>
         <tr>
           <td><?php echo _('Email Address'); ?>:</td>
           <td><?php print $row['username']; ?></td>
         </tr>
-        <input name="user_id" type="hidden"
-          value="<?php print $_GET['user_id']; ?>" class="textfield">
         <tr>
           <td><?php echo _('Password'); ?>:</td>
           <td>
@@ -251,34 +268,27 @@
           </td>
         </tr>
         <tr>
-        <?php if (function_exists('imap_qprint')) { ?>
           <td><?php echo _('Vacation message'); ?>:</td>
           <td>
-            <textarea name="vacation" cols="40" rows="5" class="textfield"><?php print imap_qprint($row['vacation']); ?></textarea>
+            <textarea name="vacation" cols="40" rows="5" class="textfield"><?php print quoted_printable_decode($row['vacation']); ?></textarea>
           </td>
-        <?php } else { ?>
-          <td><?php echo _('Vacation message (ASCII only!)'); ?>:</td>
-          <td>
-            <textarea name="vacation" cols="40" rows="5" class="textfield"><?php print $row['vacation']; ?></textarea>
-          </td>
-        <?php } ?>
         </tr>
         <tr>
           <td><?php echo _('Forwarding on'); ?>:</td>
-          <td><input name="on_forward" type="checkbox" <?php
+          <td><input name="on_forward" id="on_forward" type="checkbox" <?php
             if ($row['on_forward'] == "1") {
               print " checked";
-            } ?>>
+            } ?> onchange="fwac()" onclick="fwac()">
           </td>
         </tr>
         <tr>
-          <td><?php echo _('Forward mail to'); ?>:</td>
+          <td valign="top"><?php echo _('Forward mail to'); ?>:</td>
           <td>
-            <input type="text" size="25" name="forward"
+            <input type="text" size="25" name="forward" id="forward"
             value="<?php print $row['forward']; ?>" class="textfield"><br>
-            <?php echo _('Must be a full e-mail address'); ?>!<br>
-            <?php echo _('OR') .":<br>\n"; ?>
-            <select name="forwardmenu">
+            <?php echo _('Enter full e-mail addresses, use commas to separate them'); ?>!<br>
+            <?php echo _('or select from this list') .":<br>\n"; ?>
+            <select name="forwardmenu" id="forwardmenu" onchange="boxadd()">
               <option selected value=""></option>
               <?php
                 $queryuserlist = "SELECT realname, username, user_id, unseen
@@ -305,20 +315,19 @@
             if ($row['unseen'] == "1") {
               print " checked ";
             } ?>>
+            <input name="user_id" type="hidden"
+              value="<?php print $_GET['user_id']; ?>">
+            <input name="localpart" type="hidden"
+              value="<?php print $row['localpart']; ?>">
           </td>
         </tr>
-        <input name="user_id" type="hidden"
-          value="<?php print $_GET['user_id']; ?>" class="textfield">
-        <input name="localpart" type="hidden"
-          value="<?php print $row['localpart']; ?>" class="textfield">
         <tr>
           <td colspan="2" class="button">
-            <input name="submit" type="submit" value="Submit">
+            <input name="submit" type="submit" value="<?php echo _('Submit'); ?>">
           </td>
         </tr>
         <tr>
           <td colspan="2" style="padding-top:1em">
-          <?php echo _('Aliases to this account'); ?>:<br>
           <?php
             # Print the aliases associated with this account
             $query = "SELECT user_id,localpart,domain,realname FROM users,domains
@@ -326,6 +335,7 @@
             $sth = $dbh->prepare($query);
             $sth->execute(array(':smtp'=>$row['localpart'].'@'.$_SESSION['domain']));
             if ($sth->rowCount()) {
+              echo "<h4>"._('Aliases to this account').":</h4>";
               while ($row = $sth->fetch()) {
                 if (($row['domain'] == $_SESSION['domain'])
                   && ($row['localpart'] != "*")) {
@@ -352,15 +362,18 @@
           }
         ?>
         </td></tr>
-      </form>
-    </table>
-    <table align="center">
-      <form name="blocklist" method="post" action="adminuserblocksubmit.php">
+      </table>
+    </form>
+    <br>
+    <form name="blocklist" method="post" action="adminuserblocksubmit.php">
+      <table align="center">
         <tr>
           <td colspan="2">
-            <?php
-              echo _('Add a new header blocking filter for this user');
-            ?>:
+            <h4>
+              <?php
+                echo _('Add a new header blocking filter for this user');
+              ?>:
+            </h4>
           </td>
         </tr>
         <tr>
@@ -383,13 +396,13 @@
           </td>
         </tr>
         <tr>
-          <td>
+          <td colspan="3" class="button">
             <input name="submit" type="submit"
               value="<?php echo _('Submit'); ?>">
           </td>
         </tr>
-      </form>
-    </table>
+      </table>
+    </form>
     <table align="center">
       <tr>
         <th><?php echo _('Delete'); ?></th>

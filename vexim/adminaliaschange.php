@@ -28,7 +28,7 @@
   </head>
   <body onLoad="document.aliaschange.realname.focus()">
     <?php include dirname(__FILE__) . '/config/header.php'; ?>
-    <div id="menu">
+    <div id="Menu">
       <a href="adminalias.php"><?php echo _('Manage Aliases'); ?></a><br>
       <a href="adminaliasadd.php"><?php echo _('Add Alias'); ?></a></br>
       <a href="admin.php"><?php echo _('Main Menu'); ?></a><br>
@@ -49,14 +49,14 @@
             <td><?php echo _('Alias Name'); ?>:</td>
             <td>
               <input name="realname" type="text"
-              value="<?php print $row['realname']; ?>"class="textfield">
+              value="<?php print $row['realname']; ?>" class="textfield">
             </td>
           </tr>
           <tr>
             <td><?php echo _('Address'); ?>:</td>
             <td>
               <input name="localpart" type="text"
-              value="<?php print $row['localpart']; ?>"class="textfield">
+              value="<?php print $row['localpart']; ?>" class="textfield">
               @<?php print $_SESSION['domain']; ?>
             </td>
           </tr>
@@ -69,8 +69,7 @@
           <tr>
             <td colspan="2" style="padding-bottom:1em">
               <?php
-                echo _('Multiple addresses should be comma separated,
-                with no spaces');
+                echo _('Enter full e-mail addresses, use commas to separate them.');
               ?>
             </td>
           </tr>

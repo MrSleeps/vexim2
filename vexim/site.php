@@ -18,8 +18,9 @@
     <title><?php echo _('Virtual Exim') . ': ' . _('Manage Sites'); ?></title>
     <link rel="stylesheet" href="style.css" type="text/css">
   </head>
+  <body>
   <?php include dirname(__FILE__) . '/config/header.php'; ?>
-  <div id="menu">
+  <div id="Menu">
     <a href="siteadd.php?type=alias"><?php echo _('Add alias domain'); ?></a><br>
     <a href="siteadd.php?type=local"><?php echo _('Add local domain'); ?></a><br>
     <a href="siteadd.php?type=relay"><?php echo _('Add relay domain'); ?></a><br>
@@ -48,7 +49,7 @@
       </tr>
       <?php
         $query = "SELECT MIN(localpart) AS localpart, domain,
-          domains.domain_id, count(*) AS count    
+          domains.domain_id, count(*) AS count, domains.enabled AS enabled
           FROM   users, domains
           WHERE  users.domain_id = domains.domain_id
           AND    domain !='admin' AND admin=1";
@@ -64,11 +65,11 @@
         $sth = $dbh->prepare($query);
         $sth->execute($queryParams);
         while ($row = $sth->fetch()) {
+          if($row['enabled']==="0") print '<tr class="disabled">'; else print '<tr>';
       ?>
-            <tr>
               <td>
                 <a href="sitedelete.php?domain_id=<?php
-                  echo $row['domain_id']; ?>&domain=<?php
+                  echo $row['domain_id']; ?>&amp;domain=<?php
                   echo $row['domain']; ?>">
                   <img class="trash" title="Delete <?php $row['domain']; ?>"
                     src="images/trashcan.gif" alt="trashcan">
@@ -76,7 +77,7 @@
               </td>
               <td>
                 <a href="sitechange.php?domain_id=<?php
-                  echo $row['domain_id']; ?>&domain=<?php
+                  echo $row['domain_id']; ?>&amp;domain=<?php
                   echo $row['domain']; ?>"><?php echo $row['domain']; ?></a>
               </td>
           <?php
@@ -120,8 +121,8 @@
             <tr>
               <td>
                 <a href="sitedelete.php?domain_id=<?php
-                  echo $row['domain_id']; ?>&domain=<?php
-                  echo $row['domain']; ?>&type=relay">
+                  echo $row['domain_id']; ?>&amp;domain=<?php
+                  echo $row['domain']; ?>&amp;type=relay">
                   <img class="trash" title="<?php echo _('Delete') .
                     $row['domain']; ?>" src="images/trashcan.gif" alt="trashcan">
                 </a>
@@ -144,8 +145,8 @@
             <tr>
               <td>
                 <a href="sitedelete.php?domain_id=<?php
-                  echo $row['domain_id']; ?>&domain=<?php
-                  echo $row['alias']; ?>&type=alias">
+                  echo $row['domain_id']; ?>&amp;domain=<?php
+                  echo $row['alias']; ?>&amp;type=alias">
                   <img class="trash" title="<?php echo _('Delete')
                     . $row['alias']; ?>" src="images/trashcan.gif" alt="trashcan">
                 </a>
@@ -160,9 +161,9 @@
 		# display status of $AllowUserLogin
 		echo '<tr><td colspan="3">&nbsp;</td></tr>';       
 		if($AllowUserLogin){
-		    echo '<tr><td colspan="3">Standard user accounts are currently able to login and change their own personal details.</td></tr>';
+		    echo '<tr><td colspan="3">'._('Standard user accounts are currently able to login and change their own personal details').'.</td></tr>';
 		}else{
-			echo '<tr><td colspan="3">The system is currently configured to prevent standard users logging in to change their own personal details.</td></tr>';
+			echo '<tr><td colspan="3">'._('The system is currently configured to prevent standard users logging in to change their own personal details.').'</td></tr>';
 		}
       ?>
     </table>

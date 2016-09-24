@@ -45,6 +45,10 @@
   # Update the password, if the password was given
   if(isset($_POST['password']) && $_POST['password']!=='' ){
 	if (validate_password($_POST['password'], $_POST['vpassword'])) {
+          if (!password_strengthcheck($_POST['password'])) {  
+            header ("Location: adminalias.php?weakpass={$_POST['localpart']}");
+            die;
+          }
 		$cryptedpassword = crypt_password($_POST['password']);
 		$query = "UPDATE users SET crypt=:crypt WHERE user_id=:user_id AND domain_id=:domain_id AND type='alias'";
           $sth = $dbh->prepare($query);
@@ -91,9 +95,9 @@
     ':admin'=>$_POST['admin'],
     ':on_avscan'=>$_POST['on_avscan'],
     ':on_spamassassin'=>$_POST['on_spamassassin'],
-    ':sa_tag'=>$_POST['sa_tag'],
-    ':sa_refuse'=>$_POST['sa_refuse'],
-    ':spam_drop'=>$_POST['spam_drop'],
+    ':sa_tag'=>(isset($_POST['sa_tag']) ? $_POST['sa_tag'] : $sa_tag),
+    ':sa_refuse'=>(isset($_POST['sa_refuse']) ? $_POST['sa_refuse'] : $sa_refuse),
+    ':spam_drop'=>(isset($_POST['spam_drop']) ? $_POST['spam_drop'] : 0),
     ':enabled'=>$_POST['enabled'],
     ':user_id'=>$_POST['user_id'],
     ':domain_id'=>$_SESSION['domain_id']

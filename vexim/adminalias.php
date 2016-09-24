@@ -11,7 +11,7 @@
   </head>
   <body>
     <?php include dirname(__FILE__) . '/config/header.php'; ?>
-    <div id="menu">
+    <div id="Menu">
       <a href="adminaliasadd.php"><?php echo _('Add Alias'); ?></a></br>
       <?php $query = "SELECT user_id,realname,smtp,localpart FROM users
         WHERE domain_id=:domain_id AND type='catch'";
@@ -41,7 +41,7 @@
           print '<tr><td align="center">'
             . '<a href="adminaliasdelete.php?user_id='
             . $row['user_id']
-            . '&localpart='
+            . '&amp;localpart='
             . $row['localpart']
             . '">'
             . '<img class="trash" src="images/trashcan.gif" title="'
@@ -59,7 +59,7 @@
           print '<td class="check">';
           print '</tr>';
         }
-        $query = "SELECT user_id,localpart,smtp,realname,type,admin
+        $query = "SELECT user_id,localpart,smtp,realname,type,admin,enabled
           FROM users
           WHERE domain_id=:domain_id AND type='alias'
 		  ORDER BY localpart;";
@@ -67,12 +67,13 @@
         $sth->execute(array(':domain_id'=>$_SESSION['domain_id']));
         if ($sth->rowCount()) {
           while ($row = $sth->fetch()) {
-            print '<tr><td align="center">'
+            if($row['enabled']==="0") print '<tr class="disabled">'; else print '<tr>';
+            print '<td align="center">'
               . '<a href="adminaliasdelete.php?user_id='
               . $row['user_id']
-              . '&localpart='
+              . '&amp;localpart='
               . $row['localpart']
-              . '"><img class="trash"src="images/trashcan.gif" title="'
+              . '"><img class="trash" src="images/trashcan.gif" title="'
               . _('Delete alias ')
               . $row['localpart']
               .  '"></a></td>';
