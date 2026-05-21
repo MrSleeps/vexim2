@@ -31,12 +31,16 @@ acl_local_deny_exceptions:
   # USER WHITELIST
   ########################################################
 
-  accept
-    condition = ${lookup mysql{ \
-      SELECT 1 FROM whitelist_senders ws \
-      JOIN domains d ON ws.domain_id = d.domain_id \
-      WHERE d.domain = '${quote_mysql:$domain}' \
-        AND ws.localpart = '${quote_mysql:$local_part}' \
-        AND ws.sender = '${quote_mysql:$sender_address}' \
-      LIMIT 1 \
-    }{yes}{no}}
+   accept
+     condition = ${lookup mysql{ \
+       SELECT 1 FROM whitelist_senders ws \
+       JOIN domains d ON ws.domain_id = d.domain_id \
+       WHERE d.domain = '${quote_mysql:$domain}' \
+         AND ( \
+           ws.localpart = '${quote_mysql:$local_part}' \
+           OR ws.localpart = '*' \
+         ) \
+         AND ws.sender = '${quote_mysql:$sender_address}' \
+       LIMIT 1 \
+     }{yes}{no}}
+
