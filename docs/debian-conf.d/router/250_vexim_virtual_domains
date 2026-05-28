@@ -112,7 +112,7 @@ virtual_dom_groups:
     {${lookup mysql{ \
       SELECT g.is_public \
       FROM domains d \
-        INNER JOIN groups g ON (g.domain_id = d.domain_id) \
+        INNER JOIN `groups` g ON (g.domain_id = d.domain_id) \
       WHERE d.domain = '${quote_mysql:$domain}' \
         AND g.name = '${quote_mysql:$local_part}' \
         AND d.enabled = '1' \
@@ -122,7 +122,7 @@ virtual_dom_groups:
     {${lookup mysql{ \
       SELECT CONCAT_WS('@', u.localpart, d.domain) AS sender \
       FROM domains d \
-        INNER JOIN groups g ON (g.domain_id = d.domain_id) \
+        INNER JOIN `groups` g ON (g.domain_id = d.domain_id) \
         INNER JOIN group_contents c ON (c.group_id = g.id) \
         INNER JOIN users u ON (u.user_id = c.member_id AND u.domain_id = d.domain_id) \
       WHERE d.domain = '${quote_mysql:$domain}' \
@@ -137,7 +137,7 @@ virtual_dom_groups:
   data = ${lookup mysql{ \
     SELECT CONCAT_WS('@', u.localpart, d.domain) \
     FROM domains d \
-      INNER JOIN groups g ON (g.domain_id = d.domain_id) \
+      INNER JOIN `groups` g ON (g.domain_id = d.domain_id) \
       INNER JOIN group_contents c ON (c.group_id = g.id) \
       INNER JOIN users u ON (u.user_id = c.member_id AND u.domain_id = d.domain_id) \
     WHERE d.domain = '${quote_mysql:$domain}' \
