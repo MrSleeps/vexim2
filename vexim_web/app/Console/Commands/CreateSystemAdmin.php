@@ -59,7 +59,7 @@ class CreateSystemAdmin extends Command
             if ($this->confirm('Do you want to assign system-admin role to this user?', false)) {
                 $existingUser->assignRole($systemAdminRole);
                 $this->updateAdminFlags($existingUser);
-                $this->info('✓ System-admin role assigned to existing user!');
+                $this->info('System-admin role assigned to existing user!');
                 return 0;
             }
             
@@ -81,60 +81,45 @@ class CreateSystemAdmin extends Command
             return 1;
         }
         
-        // Get name (optional)
-        $name = $this->ask('Enter full name (optional)', 'System Administrator');
+        // Get name (required in your table)
+        $name = $this->ask('Enter full name', 'System Administrator');
         
         // Create the user
         $this->info('Creating system administrator...');
         
         try {
-            // Adjust this based on your User model's fillable fields
+            // Base user data for Laravel's default users table
             $userData = [
-                'email' => $email,
                 'name' => $name,
+                'email' => $email,
                 'password' => Hash::make($password),
                 'email_verified_at' => now(),
             ];
             
-            // Add Vexim-specific fields if they exist in your users table
-            if (Schema::hasColumn('users', 'username')) {
-                $userData['username'] = $email;
-            }
-            
-            if (Schema::hasColumn('users', 'localpart')) {
-                $userData['localpart'] = explode('@', $email)[0];
-            }
-            
-            if (Schema::hasColumn('users', 'domain_id')) {
-                $userData['domain_id'] = 1; // Assuming domain_id 1 is the system/admin domain
-            }
-            
-            if (Schema::hasColumn('users', 'type')) {
-                $userData['type'] = 'admin';
-            }
-            
-            if (Schema::hasColumn('users', 'admin')) {
-                $userData['admin'] = 1;
-            }
-            
-            if (Schema::hasColumn('users', 'enabled')) {
-                $userData['enabled'] = 1;
+            // Add recovery_email if you want to set it (optional)
+            $recoveryEmail = $this->ask('Enter recovery email (optional)', null);
+            if ($recoveryEmail) {
+                $userData['recovery_email'] = $recoveryEmail;
             }
             
             $user = User::create($userData);
             
             // Assign system-admin role
             $user->assignRole($systemAdminRole);
-            $this->updateAdminFlags($user);
             
             $this->newLine();
             $this->info('========================================');
-            $this->info('✓ System Administrator created successfully!');
-            $this->info("Email: {$email}");
+            $this->info('System Administrator created successfully!');
             $this->info("Name: {$name}");
+            $this->info("Email: {$email}");
             $this->info("Role: system-admin");
+            if ($recoveryEmail) {
+                $this->info("Recovery Email: {$recoveryEmail}");
+            }
             $this->info('========================================');
             $this->newLine();
+            
+            $this->info('Note: You can generate an app authentication secret later if needed.');
             
             return 0;
             
@@ -161,21 +146,24 @@ class CreateSystemAdmin extends Command
      */
     private function updateAdminFlags($user)
     {
-        // Update any additional admin flags in your users table
-        if (Schema::hasColumn('users', 'admin')) {
-            $user->admin = 1;
+        // For the users_web table, there are no specific admin flags
+        // The permissions are handled by Spatie's role system
+        // So we just need to ensure the user has the role
+        
+        $this->info('User permissions updated via Spatie role system');
+        
+        // If you have additional admin flags in a different table, add them here
+        // For example, if you have a separate users table (not users_web)
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'admin')) {
+            $legacyUser = \DB::table('users')->where('email', $user->email)->first();
+            if ($legacyUser) {
+                \DB::table('users')->where('email', $user->email)->update([
+                    'admin' => 1,
+                    'type' => 'admin',
+                    'enabled' => 1
+                ]);
+                $this->info('Legacy admin flags updated');
+            }
         }
-        
-        if (Schema::hasColumn('users', 'type')) {
-            $user->type = 'admin';
-        }
-        
-        if (Schema::hasColumn('users', 'enabled')) {
-            $user->enabled = 1;
-        }
-        
-        $user->save();
-        
-        $this->info('✓ Admin flags updated');
     }
 }
