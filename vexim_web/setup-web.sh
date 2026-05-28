@@ -50,6 +50,9 @@ main_setup() {
     echo -e "${GREEN}Seeding new tables${NC}"
     php artisan db:seed --class=RolePermissionSeeder
     php artisan db:seed --class=SettingsSeeder
+    echo -e "${YELLOW}ANSWER NO TO THE MIGRATIONS QUESTION${NC}"
+    echo no | php artisan fin-mail:install
+    php artisan make:filament-user
     # Your main setup commands here
     # php artisan fin-mail:install --no-interaction
     # etc.
