@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('recovery_email')->nullable;
+            $table->text('recovery_email')->nullable();
         });
         Schema::table('users_web', function (Blueprint $table) {
-            $table->text('recovery_email')->nullable;
+            $table->text('recovery_email')->nullable();
         });
 
     }
