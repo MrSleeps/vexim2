@@ -21,7 +21,6 @@ install_vexim_tables() {
 # Function for main setup
 main_setup() {
     echo -e "${GREEN}Running main setup...${NC}"
-    composer install
     echo -e "${GREEN}Generating app key${NC}"
     php artisan key:generate
     echo -e "${GREEN}Creating web database tables${NC}"
@@ -139,10 +138,13 @@ main() {
     # Step 1: Validate environment
     validate_env
     
-    # Step 2: Ask about fresh setup / Vexim tables
+    # Step 2: Composer Install
+    composer install
+ 
+    # Step 3: Ask about fresh setup / Vexim tables
     ask_fresh_setup
     
-    # Step 3: Run main setup
+    # Step 4: Run main setup
     main_setup
     
     echo -e "${GREEN}========================================${NC}"
