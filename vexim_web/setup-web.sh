@@ -12,6 +12,28 @@ error_exit() {
     exit 1
 }
 
+# Create necessary directories
+create_directories() {
+    echo -e "${YELLOW}Creating required directories...${NC}"
+    
+    # Create bootstrap/cache directory
+    mkdir -p bootstrap/cache
+    chmod 775 bootstrap/cache
+    
+    # Create storage directories
+    mkdir -p storage/framework/cache
+    mkdir -p storage/framework/sessions
+    mkdir -p storage/framework/views
+    mkdir -p storage/logs
+    mkdir -p storage/app
+    
+    # Set permissions
+    chmod -R 775 storage
+    chmod -R 775 bootstrap/cache
+    
+    echo -e "${GREEN}Directories created and permissions set${NC}"
+}
+
 # Function for fresh setup (install vexim database tables)
 install_vexim_tables() {
     echo -e "${YELLOW}Installing Vexim database tables...${NC}"
@@ -35,7 +57,7 @@ main_setup() {
     echo -e "${GREEN}Main setup completed${NC}"
 }
 
-# Validation function (from previous answer)
+# Validation function
 validate_env() {
     # Check if .env exists
     if [ ! -f ".env" ]; then
@@ -133,19 +155,52 @@ ask_fresh_setup() {
     echo
 }
 
+# Function to update .env for production
+update_production_env() {
+    echo -e "${YELLOW}Updating .env for production...${NC}"
+    
+    # Change APP_ENV from local to production
+    if grep -q "^APP_ENV=" .env; then
+        sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
+        echo -e "${GREEN}✓ APP_ENV set to production${NC}"
+    else
+        echo "APP_ENV=production" >> .env
+        echo -e "${GREEN}✓ APP_ENV added as production${NC}"
+    fi
+    
+    # Change APP_DEBUG from true to false
+    if grep -q "^APP_DEBUG=" .env; then
+        sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+        echo -e "${GREEN}✓ APP_DEBUG set to false${NC}"
+    else
+        echo "APP_DEBUG=false" >> .env
+        echo -e "${GREEN}✓ APP_DEBUG added as false${NC}"
+    fi
+    
+    echo -e "${GREEN}Production environment settings applied${NC}"
+}
+
+
 # Main execution flow
 main() {
-    # Step 1: Validate environment
+    # Step 1: Create necessary directories FIRST
+    create_directories
+    
+    # Step 2: Validate environment
     validate_env
     
-    # Step 2: Composer Install
+    # Step 3: Composer Install
     composer install
  
-    # Step 3: Ask about fresh setup / Vexim tables
+    # Step 4: Ask about fresh setup / Vexim tables
     ask_fresh_setup
     
-    # Step 4: Run main setup
+    # Step 5: Run main setup
     main_setup
+
+    # Step 6: Convert .env to production
+    update_production_env
+
     
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}Setup completed successfully!${NC}"
