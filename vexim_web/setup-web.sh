@@ -160,19 +160,19 @@ update_production_env() {
     # Change APP_ENV from local to production
     if grep -q "^APP_ENV=" .env; then
         sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
-        echo -e "${GREEN}✓ APP_ENV set to production${NC}"
+        echo -e "${GREEN}APP_ENV set to production${NC}"
     else
         echo "APP_ENV=production" >> .env
-        echo -e "${GREEN}✓ APP_ENV added as production${NC}"
+        echo -e "${GREEN}APP_ENV added as production${NC}"
     fi
     
     # Change APP_DEBUG from true to false
     if grep -q "^APP_DEBUG=" .env; then
         sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
-        echo -e "${GREEN}✓ APP_DEBUG set to false${NC}"
+        echo -e "${GREEN}APP_DEBUG set to false${NC}"
     else
         echo "APP_DEBUG=false" >> .env
-        echo -e "${GREEN}✓ APP_DEBUG added as false${NC}"
+        echo -e "${GREEN}APP_DEBUG added as false${NC}"
     fi
     
     echo -e "${GREEN}Production environment settings applied${NC}"
@@ -190,13 +190,16 @@ main() {
     # Step 3: Composer Install
     composer install
  
-    # Step 4: Ask about fresh setup / Vexim tables
+    # Step 4: npm install
+    npm install
+
+    # Step 5: Ask about fresh setup / Vexim tables
     ask_fresh_setup
     
-    # Step 5: Run main setup
+    # Step 6: Run main setup
     main_setup
 
-    # Step 6: Convert .env to production
+    # Step 7: Convert .env to production
     update_production_env
 
     
