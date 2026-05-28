@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Auth;
+
+use App\Models\EximUser;
+use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Traits\HasRoles;
+
+class EximUserWrapper implements Authenticatable
+{
+    use AuthenticatableTrait, HasRoles;
+    
+    protected $originalUser;
+    
+    public function __construct(EximUser $originalUser)
+    {
+        $this->originalUser = $originalUser;
+        
+        // Assign the domain-user role to EximUser
+        $this->assignRole('domain-user');
+    }
+    
+    public function getOriginalUser()
+    {
+        return $this->originalUser;
+    }
+    
+    public function getAuthIdentifierName()
+    {
+        return $this->originalUser->getAuthIdentifierName();
+    }
+    
+    public function getAuthIdentifier()
+    {
+        return $this->originalUser->getAuthIdentifier();
+    }
+    
+    public function getAuthPassword()
+    {
+        return $this->originalUser->getAuthPassword();
+    }
+    
+    public function getRememberToken()
+    {
+        return $this->originalUser->getRememberToken();
+    }
+    
+    public function setRememberToken($value)
+    {
+        $this->originalUser->setRememberToken($value);
+    }
+    
+    public function getRememberTokenName()
+    {
+        return $this->originalUser->getRememberTokenName();
+    }
+    
+    // Delegate other calls to the original user
+    public function __call($method, $arguments)
+    {
+        return $this->originalUser->$method(...$arguments);
+    }
+    
+    public function __get($key)
+    {
+        return $this->originalUser->$key;
+    }
+    
+    public function __set($key, $value)
+    {
+        $this->originalUser->$key = $value;
+    }
+    
+    public function __isset($key)
+    {
+        return isset($this->originalUser->$key);
+    }
+    
+    // Implement required methods for Spatie permissions
+    public function getTable()
+    {
+        return $this->originalUser->getTable();
+    }
+    
+    public function getKey()
+    {
+        return $this->originalUser->getKey();
+    }
+    
+    public function save(array $options = [])
+    {
+        return $this->originalUser->save($options);
+    }
+}

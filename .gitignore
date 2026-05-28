@@ -1,1 +1,9 @@
-vexim/config/variables.php
+
+# Laravel / vexim_web exclusions
+/vexim_web/.env
+/vexim_web/vendor/
+/vexim_web/node_modules/
+/vexim_web/storage/logs/
+/vexim_web/storage/framework/
+/vexim_web/bootstrap/cache/
+/vexim_web/.phpunit.cache/
