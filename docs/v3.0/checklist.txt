@@ -1,0 +1,101 @@
+Checklist to follow after updating code, to confirm functionality
+=================================================================
+
+[x] Logging in as Siteadmin
+Site management:
+    [ ] Adding domains: local and relay
+        [ ] With and without max accounts
+	[ ] With and without quotas
+	[ ] With and without maximum message size
+	[ ] Different SpamAssassin scores
+	[ ] With and without SpamAssassin
+	[ ] With and without Anti-Virus
+	[ ] With and without Piping mail option
+	[ ] With and without 'Domain enabled'
+    [ ] Changing domain admin password
+    [ ] Changing UID/GID flags
+    [ ] Changing Boolean flags has impact on admin/users
+    [ ] Changing 'Enabled' works
+    [ ] Deleting domains
+    [ ] Adding domain alias
+    [ ] Deleting domain alias
+    [ ] Adding relay domain
+    [ ] Deleting relay domain
+
+Siteadmin Management:
+    [ ] Change siteadmin password
+    [ ] Set siteadmin password to 'CHANGE', at next login you must change password.
+
+Account Additions:
+    [ ] Adding aliases works
+    [ ] Adding Catchall:
+        [ ] Does the 'Add Catchall' option disappear if a Catchall exists?
+    [ ] Adding POP/IMAP accounts:
+        [ ] If the SpamAssassin/Anti-Virus/Piping options are disabled,
+	    do they still show up?
+	[ ] Can you enable/disable the availible options?
+        [ ] Can you change SpamAssassin scores?
+        [ ] Can you change if spam mails are moved/deleted?
+    [ ] Does adding :fail:'s work?
+    [ ] If you have a maximum number of accounts:
+        [ ] Is this displayed?
+        [ ] Is the current number of accounts displayed?
+        [ ] Does adding more than max accounts fail?
+
+Account Management:
+    As Admin:
+    [ ] Update Aliases:
+        [ ] Can you update the name?
+	[ ] Can you update the 'to' ?
+	[ ] Can you update the final destination?
+        [ ] Can you enable/disable Anti-Virus?
+        [ ] Can you enable/disable SpamAssassin?
+        [ ] Can you update SpamAssassin scores?
+        [ ] Can you change if spam mails are forwarded/deleted?
+    [ ] Update Catchall:
+        [ ] Can you update the final destination?
+    [ ] Update POP/IMAP accounts - name, password, UID, GID, procmail, admin
+        [ ] Can you update the name?
+        [ ] Can you update the password?
+        [ ] Can you update the UID?
+        [ ] Can you update the GID?
+        [ ] Can you update the piping value?
+        [ ] Can you update the admin flag?
+        [ ] Can you update the SpamAssassin flag?
+        [ ] Can you update the Anti-Virus flag?
+        [ ] Can you update the SpamAssassin scores?
+        [ ] Can you update the Spam-mail handling (move/delete)?
+        [ ] Can you update the enabled flag?
+	[ ] Can you add and remove header filters?
+    [ ] Update :fail:'s
+        [ ] Can you update the name?
+    As User:
+    [ ] Can you update your name?
+    [ ] Can you change your password? (Try to re-login!)
+    [ ] Can you enable/disable Anti-Virus?
+    [ ] Can you enable/disable Spamassassin?
+    [ ] Can you change SpamAssassin scores?
+    [ ] Can you change the Spam-mail handling (move/delete)?
+    [ ] Can you add/remove header filters?
+
+[ ] Logging in as Postmaster, a second Admin user, and a regular user
+    [ ] Can you log in if the domain is disabled? Should work as postmaster, should not work as user
+    [ ] Can you log in if the account is disabled? Should fail
+
+Account Deletions:
+    [ ] Does deleting Aliases work?
+    [ ] Does deleting Catchall work?
+    [ ] Does deleteing POP/IMAP accounts work?
+    [ ] Does deleting :fail:'s work?
+
+Testing Failures:
+    [ ] Adding duplicate account
+    [ ] Adding alias using existing account name
+    [ ] Adding duplicate alias
+    [ ] Email disabled accounts
+    [ ] Going over quota
+    [ ] Quota warnings
+    [ ] Update mis-matched passwords as admin
+    [ ] Update mis-matched passwords as user
+    [ ] Creating POP/IMAP accounts with blank values
+    [ ] Creating alias accounts with blank values
